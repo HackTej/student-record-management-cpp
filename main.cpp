@@ -24,7 +24,6 @@ void addStudent() {
     cout << "Enter Course: ";
     getline(cin, s.course);
     
-    // Save to file comma-separated
     file << s.rollNo << "," << s.name << "," << s.course << endl;
     file.close();
     
@@ -59,7 +58,6 @@ void searchStudent() {
     
     bool found = false;
     while (getline(file, line)) {
-        // If the line starts with the exact roll number and a comma
         if (line.find(searchRoll + ",") == 0) {
             cout << "\n[Record Found]: " << line << endl;
             found = true;
@@ -73,6 +71,90 @@ void searchStudent() {
     file.close();
 }
 
+void updateStudent() {
+    ifstream file("students.txt");
+    if (!file) {
+        cout << "\n[Error] No database found.\n";
+        return;
+    }
+
+    string targetRoll, line;
+    cout << "Enter Roll Number to update: ";
+    cin >> targetRoll;
+
+    ofstream temp("temp.txt");
+    bool found = false;
+
+    while (getline(file, line)) {
+        // Raw string matching to find the target roll number line
+        if (line.find(targetRoll + ",") == 0) {
+            found = true;
+            Student s;
+            s.rollNo = targetRoll;
+            cin.ignore();
+            cout << "Enter New Full Name: ";
+            getline(cin, s.name);
+            cout << "Enter New Course: ";
+            getline(cin, s.course);
+
+            // Write the updated data string into the temporary file
+            temp << s.rollNo << "," << s.name << "," << s.course << endl;
+        } else {
+            // Keep all other lines unchanged
+            temp << line << endl;
+        }
+    }
+
+    file.close();
+    temp.close();
+
+    // Replace old file with the updated temporary file
+    remove("students.txt");
+    rename("temp.txt", "students.txt");
+
+    if (found) {
+        cout << "\n[Success] Student record updated successfully.\n";
+    } else {
+        cout << "\n[Not Found] Roll Number not found.\n";
+    }
+}
+
+void deleteStudent() {
+    ifstream file("students.txt");
+    if (!file) {
+        cout << "\n[Error] No database found.\n";
+        return;
+    }
+
+    string targetRoll, line;
+    cout << "Enter Roll Number to delete: ";
+    cin >> targetRoll;
+
+    ofstream temp("temp.txt");
+    bool found = false;
+
+    while (getline(file, line)) {
+        // If it matches the roll number, skip writing it (deleting it)
+        if (line.find(targetRoll + ",") == 0) {
+            found = true;
+        } else {
+            temp << line << endl;
+        }
+    }
+
+    file.close();
+    temp.close();
+
+    remove("students.txt");
+    rename("temp.txt", "students.txt");
+
+    if (found) {
+        cout << "\n[Success] Student record deleted successfully.\n";
+    } else {
+        cout << "\n[Not Found] Roll Number not found.\n";
+    }
+}
+
 int main() {
     int choice;
     do {
@@ -80,7 +162,9 @@ int main() {
         cout << "1. Add New Student\n";
         cout << "2. View All Students\n";
         cout << "3. Search by Roll Number\n";
-        cout << "4. Exit\n";
+        cout << "4. Update Student\n";
+        cout << "5. Delete Student\n";
+        cout << "6. Exit\n";
         cout << "Enter choice: ";
         cin >> choice;
         
@@ -88,10 +172,12 @@ int main() {
             case 1: addStudent(); break;
             case 2: viewAllStudents(); break;
             case 3: searchStudent(); break;
-            case 4: cout << "Exiting system...\n"; break;
+            case 4: updateStudent(); break;
+            case 5: deleteStudent(); break;
+            case 6: cout << "Exiting system...\n"; break;
             default: cout << "Invalid selection. Try again.\n";
         }
-    } while (choice != 4);
+    } while (choice != 6);
     
     return 0;
 }
