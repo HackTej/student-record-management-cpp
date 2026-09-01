@@ -1,0 +1,11 @@
+# Compiled Executables
+*.exe
+*.out
+*.o
+
+# Local Database Files
+students.txt
+
+# IDE Settings
+.vscode/
+.idea/
